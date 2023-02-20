@@ -8,6 +8,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Innowise.Clinic.Services.Dto\Innowise.Clinic.Services.Dto.csproj" />
+      <ProjectReference Include="..\Innowise.Clinic.Services.Exceptions\Innowise.Clinic.Services.Exceptions.csproj" />
+      <ProjectReference Include="..\Innowise.Clinic.Services.Persistence\Innowise.Clinic.Services.Persistence.csproj" />
     </ItemGroup>
 
 </Project>

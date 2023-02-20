@@ -9,12 +9,20 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.2" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.3" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="7.0.3" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Innowise.Clinic.Services.Configuration\Innowise.Clinic.Services.Configuration.csproj" />
       <ProjectReference Include="..\Innowise.Clinic.Services.Dto\Innowise.Clinic.Services.Dto.csproj" />
+      <ProjectReference Include="..\Innowise.Clinic.Services.Persistence\Innowise.Clinic.Services.Persistence.csproj" />
     </ItemGroup>
 
     <ItemGroup>

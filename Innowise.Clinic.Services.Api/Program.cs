@@ -1,22 +1,29 @@
 using Innowise.Clinic.Services.Configuration;
+using Innowise.Clinic.Services.Persistence;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddDbContext<ServicesDbContext>(opts =>
+    opts.UseSqlServer(builder.Configuration.GetConnectionString("default")));
+
 builder.Services.ConfigureSwagger();
+builder.Services.ConfigureSecurity();
 builder.Services.RegisterServices();
 
 var app = builder.Build();
 
+await app.PrepareDatabase();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

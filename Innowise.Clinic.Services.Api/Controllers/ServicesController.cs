@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Innowise.Clinic.Services.Api.Controllers;
 
 [ApiController]
+[Route("services")]
 public class ServicesController : ControllerBase
 {
     private readonly IServiceService _serviceService;
@@ -18,9 +19,9 @@ public class ServicesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ServiceDto>>> GetServices()
     {
-        // results for certain category + specialization could be requested
+        var isDisplayOnlyActiveServices = !User?.IsInRole("Receptionist") ?? true;
 
-        return Ok(await _serviceService.GetServicesAsync(!User.IsInRole("Receptionist")));
+        return Ok(await _serviceService.GetServicesAsync(isDisplayOnlyActiveServices));
     }
 
     [HttpGet("{id:guid}")]

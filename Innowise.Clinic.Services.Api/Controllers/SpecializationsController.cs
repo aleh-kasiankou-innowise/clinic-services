@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace Innowise.Clinic.Services.Api.Controllers;
 
 [ApiController]
+[Route("specializations")]
 public class SpecializationsController : ControllerBase
 {
-    
     private readonly ISpecializationService _specializationService;
 
     public SpecializationsController(ISpecializationService specializationService)
@@ -22,7 +22,7 @@ public class SpecializationsController : ControllerBase
     {
         return Ok(await _specializationService.GetSpecializationsAsync(!User.IsInRole("Receptionist")));
     }
-    
+
     [HttpGet("{id:guid}")]
     [Authorize(Roles = "Receptionist")]
     public async Task<ActionResult<SpecializationWithServicesDto>> GetSpecializationInfo([FromRoute] Guid id)
@@ -35,15 +35,13 @@ public class SpecializationsController : ControllerBase
     {
         return Ok((await _specializationService.CreateSpecializationAsync(newSpecialization)).ToString());
     }
-    
-    [HttpPut("{id:guid}")]
-    public async Task<IActionResult> EditSpecialization([FromRoute] Guid id, [FromBody] SpecializationEditStatusDto updatedSpecialization)
-    {
 
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> EditSpecialization([FromRoute] Guid id,
+        [FromBody] SpecializationEditStatusDto updatedSpecialization)
+    {
         await _specializationService.UpdateSpecializationAsync(id, updatedSpecialization);
         return Ok();
         // Polymorphic deserialization (StatusUpdate, CompleteUpdate)
     }
-    
-    
 }

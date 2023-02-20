@@ -1,0 +1,31 @@
+version: "3.9"
+
+services:
+  service:
+    container_name: service
+    hostname: service
+    depends_on: [ service-db, ]
+    
+    build:
+      context: ../
+      dockerfile: Innowise.Clinic.Services.Api/Dockerfile
+    
+    ports:
+      - "26010:80"
+      - "26015:443"
+    env_file:
+      - ../../jwt-secrets.env
+    restart: unless-stopped
+  
+  service-db:
+    container_name: service-db
+    hostname: service-db
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    ports:
+      - "26014:1433"
+    
+    environment:
+      SA_PASSWORD: "secureMssqlServerPassw0rd"
+      ACCEPT_EULA: "Y"
+    
+    restart: unless-stopped
