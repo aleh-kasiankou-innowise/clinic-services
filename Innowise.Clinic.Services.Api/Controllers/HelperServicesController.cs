@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Innowise.Clinic.Services.Api.Controllers;
 
 [ApiController]
-[Route("{controller}")]
+[Route("[controller]")]
 public class HelperServicesController : ControllerBase
 {
     [HttpGet("ensure-exists/specialization/{id:guid}")]
