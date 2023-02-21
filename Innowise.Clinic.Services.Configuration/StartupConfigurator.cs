@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Services.Persistence.Models;
+using Innowise.Clinic.Services.RequestPipeline;
 using Innowise.Clinic.Services.Services.ServiceService.Implementations;
 using Innowise.Clinic.Services.Services.ServiceService.Interfaces;
 using Innowise.Clinic.Services.Services.SpecializationService.Implementations;
@@ -20,6 +21,7 @@ public static class StartupConfigurator
     {
         services.AddScoped<IServiceService, ServiceService>();
         services.AddScoped<ISpecializationService, SpecializationService>();
+        services.AddSingleton<ExceptionHandlingMiddleware>();
         return services;
     }
 

@@ -1,5 +1,6 @@
 using Innowise.Clinic.Services.Configuration;
 using Innowise.Clinic.Services.Persistence;
+using Innowise.Clinic.Services.RequestPipeline;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,7 @@ var app = builder.Build();
 
 await app.PrepareDatabase();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 

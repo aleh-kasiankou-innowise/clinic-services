@@ -1,3 +1,4 @@
+using Innowise.Clinic.Services.Services.ServiceService.Interfaces;
 using Innowise.Clinic.Services.Services.SpecializationService.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,17 +8,20 @@ namespace Innowise.Clinic.Services.Api.Controllers;
 [Route("{controller}")]
 public class HelperServicesController : ControllerBase
 {
-    private readonly ISpecializationService _specializationService;
-
-    public HelperServicesController(ISpecializationService specializationService)
+    [HttpGet("ensure-exists/specialization/{id:guid}")]
+    public async Task<IActionResult> EnsureSpecializationExists([FromRoute] Guid id,
+        [FromServices] ISpecializationService specializationService)
     {
-        _specializationService = specializationService;
+        await specializationService.GetSpecializationInfoAsync(id);
+        return Ok();
     }
 
-    [HttpGet("ensure-exists/specialization/{id:guid}")]
-    public async Task<IActionResult> EnsureSpecializationExists([FromRoute] Guid id)
+    [HttpGet("ensure-exists/service/{id:guid}")]
+    public async Task<IActionResult> EnsureServiceExists([FromRoute] Guid id, [FromQuery] Guid? specializationId,
+        [FromServices] IServiceService serviceService)
     {
-        await _specializationService.GetSpecializationInfoAsync(id);
+        var serviceDto = await serviceService.GetServiceAsyncInfoAsync(id);
+        if (specializationId != null && specializationId != serviceDto.SpecializationId) return BadRequest();
         return Ok();
     }
 }

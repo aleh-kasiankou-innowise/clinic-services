@@ -18,6 +18,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Innowise.Clinic.Services.Persistence\Innowise.Clinic.Services.Persistence.csproj" />
+      <ProjectReference Include="..\Innowise.Clinic.Services.RequestPipeline\Innowise.Clinic.Services.RequestPipeline.csproj" />
       <ProjectReference Include="..\Innowise.Clinic.Services.Services\Innowise.Clinic.Services.Services.csproj" />
     </ItemGroup>
 
