@@ -1,19 +1,24 @@
 using Innowise.Clinic.Services.Dto;
+using Innowise.Clinic.Services.Dto.RabbitMq;
 using Innowise.Clinic.Services.Exceptions;
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Services.Persistence.Models;
+using Innowise.Clinic.Services.Services.RabbitMqPublisher;
 using Innowise.Clinic.Services.Services.SpecializationService.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using SpecializationDto = Innowise.Clinic.Services.Dto.SpecializationDto;
 
 namespace Innowise.Clinic.Services.Services.SpecializationService.Implementations;
 
 public class SpecializationService : ISpecializationService
 {
     private readonly ServicesDbContext _dbContext;
+    private readonly IRabbitMqPublisher _rabbitMqPublisher;
 
-    public SpecializationService(ServicesDbContext dbContext)
+    public SpecializationService(ServicesDbContext dbContext, IRabbitMqPublisher rabbitMqPublisher)
     {
         _dbContext = dbContext;
+        _rabbitMqPublisher = rabbitMqPublisher;
     }
 
     public async Task<IEnumerable<Specialization>> GetSpecializationsAsync(bool isFilterByActiveStatus)
@@ -50,6 +55,10 @@ public class SpecializationService : ISpecializationService
         _dbContext.Add(specialization);
         await _dbContext.SaveChangesAsync();
 
+        _rabbitMqPublisher.NotifyAboutSpecializationChange(
+            new SpecializationChangeTaskDto(SpecializationChange.Add,
+                new Dto.RabbitMq.SpecializationDto(specialization.SpecializationId, specialization.Name))
+        );
         return specialization.SpecializationId;
     }
 
@@ -57,15 +66,25 @@ public class SpecializationService : ISpecializationService
     {
         var specialization = await GetSpecializationByIdAsync(id);
         specialization.IsActive = updatedSpecializationEditStatusDto.IsActive;
+        bool specializationNameChanged = false;
 
         if (updatedSpecializationEditStatusDto is SpecializationEditAllFieldsDto editAllFieldsDto)
         {
+            specializationNameChanged = specialization.Name != editAllFieldsDto.Name;
             specialization.Name = editAllFieldsDto.Name;
             specialization.IsActive = editAllFieldsDto.IsActive;
         }
 
         _dbContext.Update(specialization);
         await _dbContext.SaveChangesAsync();
+        
+        if (specializationNameChanged)
+        {
+            _rabbitMqPublisher.NotifyAboutSpecializationChange(
+                new SpecializationChangeTaskDto(SpecializationChange.Update,
+                    new Dto.RabbitMq.SpecializationDto(specialization.SpecializationId, specialization.Name))
+            );
+        }
     }
 
     private async Task<Specialization> GetSpecializationByIdAsync(Guid id)

@@ -12,4 +12,8 @@
       <ProjectReference Include="..\Innowise.Clinic.Services.Persistence\Innowise.Clinic.Services.Persistence.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
+    </ItemGroup>
+
 </Project>

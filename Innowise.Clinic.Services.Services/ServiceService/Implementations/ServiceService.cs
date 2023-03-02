@@ -48,7 +48,6 @@ public class ServiceService : IServiceService
 
         _dbContext.Services.Add(newService);
         await _dbContext.SaveChangesAsync();
-
         return newService.ServiceId;
     }
 
@@ -72,7 +71,11 @@ public class ServiceService : IServiceService
     private async Task<Service> GetServiceById(Guid id)
     {
         var service = await _dbContext.Services.FirstOrDefaultAsync(x => x.ServiceId == id);
-        if (service == null) throw new EntityNotFoundException("The service with the specified id doesn't exist.");
+        if (service == null)
+        {
+            throw new EntityNotFoundException("The service with the specified id doesn't exist.");
+        }
+
         return service;
     }
 }

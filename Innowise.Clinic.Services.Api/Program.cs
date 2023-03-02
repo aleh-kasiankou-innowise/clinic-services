@@ -13,7 +13,7 @@ builder.Services.AddDbContext<ServicesDbContext>(opts =>
 
 builder.Services.ConfigureSwagger();
 builder.Services.ConfigureSecurity();
-builder.Services.RegisterServices();
+builder.Services.RegisterServices(builder.Configuration);
 
 var app = builder.Build();
 
