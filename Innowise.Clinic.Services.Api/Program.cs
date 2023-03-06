@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ServicesDbContext>(opts =>
 builder.Services.ConfigureSwagger();
 builder.Services.ConfigureSecurity();
 builder.Services.RegisterServices(builder.Configuration);
+builder.Services.ConfigureCrossServiceCommunication(builder.Configuration);
 
 var app = builder.Build();
 

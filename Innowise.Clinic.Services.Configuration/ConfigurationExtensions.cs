@@ -1,11 +1,11 @@
 ﻿using System.Text;
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Services.RequestPipeline;
-using Innowise.Clinic.Services.Services.RabbitMqPublisher;
 using Innowise.Clinic.Services.Services.ServiceService.Implementations;
 using Innowise.Clinic.Services.Services.ServiceService.Interfaces;
 using Innowise.Clinic.Services.Services.SpecializationService.Implementations;
 using Innowise.Clinic.Services.Services.SpecializationService.Interfaces;
+using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -20,11 +20,28 @@ public static class ConfigurationExtensions
 {
     public static IServiceCollection RegisterServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<RabbitOptions>(configuration.GetSection("RabbitConfigurations"));
         services.AddScoped<IServiceService, ServiceService>();
         services.AddScoped<ISpecializationService, SpecializationService>();
         services.AddSingleton<ExceptionHandlingMiddleware>();
-        services.AddSingleton<IRabbitMqPublisher, RabbitMqPublisher>();
+        return services;
+    }
+    
+    public static IServiceCollection ConfigureCrossServiceCommunication(this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var rabbitMqConfig = configuration.GetSection("RabbitConfigurations");
+        services.AddMassTransit(x =>
+        {
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.Host(rabbitMqConfig["HostName"], h =>
+                {
+                    h.Username(rabbitMqConfig["UserName"]);
+                    h.Password(rabbitMqConfig["Password"]);
+                });
+                cfg.ConfigureEndpoints(context);
+            });
+        });
         return services;
     }
 

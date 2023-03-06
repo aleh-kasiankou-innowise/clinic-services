@@ -13,6 +13,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="innowise.clinic.shared" Version="0.0.7" />
+      <PackageReference Include="MassTransit" Version="8.0.13" />
+      <PackageReference Include="MassTransit.RabbitMQ" Version="8.0.13" />
       <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
     </ItemGroup>
 

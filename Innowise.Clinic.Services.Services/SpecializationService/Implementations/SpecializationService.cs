@@ -1,10 +1,11 @@
 using Innowise.Clinic.Services.Dto;
-using Innowise.Clinic.Services.Dto.RabbitMq;
 using Innowise.Clinic.Services.Exceptions;
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Services.Persistence.Models;
-using Innowise.Clinic.Services.Services.RabbitMqPublisher;
 using Innowise.Clinic.Services.Services.SpecializationService.Interfaces;
+using Innowise.Clinic.Shared.Enums;
+using Innowise.Clinic.Shared.MassTransit.MessageTypes.Events;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using SpecializationDto = Innowise.Clinic.Services.Dto.SpecializationDto;
 
@@ -13,12 +14,12 @@ namespace Innowise.Clinic.Services.Services.SpecializationService.Implementation
 public class SpecializationService : ISpecializationService
 {
     private readonly ServicesDbContext _dbContext;
-    private readonly IRabbitMqPublisher _rabbitMqPublisher;
+    private readonly IBus _bus;
 
-    public SpecializationService(ServicesDbContext dbContext, IRabbitMqPublisher rabbitMqPublisher)
+    public SpecializationService(ServicesDbContext dbContext, IBus bus)
     {
         _dbContext = dbContext;
-        _rabbitMqPublisher = rabbitMqPublisher;
+        _bus = bus;
     }
 
     public async Task<IEnumerable<Specialization>> GetSpecializationsAsync(bool isFilterByActiveStatus)
@@ -55,9 +56,9 @@ public class SpecializationService : ISpecializationService
         _dbContext.Add(specialization);
         await _dbContext.SaveChangesAsync();
 
-        _rabbitMqPublisher.NotifyAboutSpecializationChange(
-            new SpecializationChangeTaskDto(SpecializationChange.Add,
-                new Dto.RabbitMq.SpecializationDto(specialization.SpecializationId, specialization.Name))
+        await _bus.Publish(
+            new SpecializationUpdatedMessage(SpecializationChange.Add,
+                new Shared.Dto.SpecializationDto(specialization.SpecializationId, specialization.Name))
         );
         return specialization.SpecializationId;
     }
@@ -77,12 +78,12 @@ public class SpecializationService : ISpecializationService
 
         _dbContext.Update(specialization);
         await _dbContext.SaveChangesAsync();
-        
+
         if (specializationNameChanged)
         {
-            _rabbitMqPublisher.NotifyAboutSpecializationChange(
-                new SpecializationChangeTaskDto(SpecializationChange.Update,
-                    new Dto.RabbitMq.SpecializationDto(specialization.SpecializationId, specialization.Name))
+            await _bus.Publish(
+                new SpecializationUpdatedMessage(SpecializationChange.Update,
+                    new Shared.Dto.SpecializationDto(specialization.SpecializationId, specialization.Name))
             );
         }
     }
