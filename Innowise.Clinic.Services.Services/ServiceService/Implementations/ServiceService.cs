@@ -1,8 +1,8 @@
 using Innowise.Clinic.Services.Dto;
-using Innowise.Clinic.Services.Exceptions;
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Services.Persistence.Models;
 using Innowise.Clinic.Services.Services.ServiceService.Interfaces;
+using Innowise.Clinic.Shared.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Innowise.Clinic.Services.Services.ServiceService.Implementations;

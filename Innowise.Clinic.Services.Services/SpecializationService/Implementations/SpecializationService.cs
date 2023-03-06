@@ -1,9 +1,9 @@
 using Innowise.Clinic.Services.Dto;
-using Innowise.Clinic.Services.Exceptions;
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Services.Persistence.Models;
 using Innowise.Clinic.Services.Services.SpecializationService.Interfaces;
 using Innowise.Clinic.Shared.Enums;
+using Innowise.Clinic.Shared.Exceptions;
 using Innowise.Clinic.Shared.MassTransit.MessageTypes.Events;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
