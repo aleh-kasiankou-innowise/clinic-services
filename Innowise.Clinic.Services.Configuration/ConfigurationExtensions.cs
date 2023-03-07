@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Services.RequestPipeline;
+using Innowise.Clinic.Services.Services.MassTransitService.Consumers;
 using Innowise.Clinic.Services.Services.ServiceService.Implementations;
 using Innowise.Clinic.Services.Services.ServiceService.Interfaces;
 using Innowise.Clinic.Services.Services.SpecializationService.Implementations;
@@ -25,13 +26,14 @@ public static class ConfigurationExtensions
         services.AddSingleton<ExceptionHandlingMiddleware>();
         return services;
     }
-    
+
     public static IServiceCollection ConfigureCrossServiceCommunication(this IServiceCollection services,
         IConfiguration configuration)
     {
         var rabbitMqConfig = configuration.GetSection("RabbitConfigurations");
         services.AddMassTransit(x =>
         {
+            x.AddConsumer<ServiceConsistencyCheckRequestConsumer>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host(rabbitMqConfig["HostName"], h =>
