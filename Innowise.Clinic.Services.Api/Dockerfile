@@ -5,6 +5,7 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
+COPY ["Innowise.Clinic.Services.Api/NuGet.Config", "./"]
 COPY ["Innowise.Clinic.Services.Api/Innowise.Clinic.Services.Api.csproj", "Innowise.Clinic.Services.Api/"]
 COPY ["Innowise.Clinic.Services.Dto/Innowise.Clinic.Services.Dto.csproj", "Innowise.Clinic.Services.Dto/"]
 COPY ["Innowise.Clinic.Services.Configuration/Innowise.Clinic.Services.Configuration.csproj", "Innowise.Clinic.Services.Configuration/"]
