@@ -1,42 +1,61 @@
 using Innowise.Clinic.Services.Persistence;
 using Innowise.Clinic.Shared.MassTransit.MessageTypes.Requests;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 
 namespace Innowise.Clinic.Services.Services.MassTransitService.Consumers;
 
 public class ServiceConsistencyCheckRequestConsumer : IConsumer<ServiceExistsAndBelongsToSpecializationRequest>
 {
     private readonly ServicesDbContext _dbContext;
+    private readonly ILogger<ServiceConsistencyCheckRequestConsumer> _logger;
 
-    public ServiceConsistencyCheckRequestConsumer(ServicesDbContext dbContext)
+    public ServiceConsistencyCheckRequestConsumer(ServicesDbContext dbContext,
+        ILogger<ServiceConsistencyCheckRequestConsumer> logger)
     {
         _dbContext = dbContext;
+        _logger = logger;
     }
 
     public async Task Consume(ConsumeContext<ServiceExistsAndBelongsToSpecializationRequest> context)
     {
-        var service = await _dbContext.Services.FindAsync(context.Message.ServiceId.ToString());
+        var service = await _dbContext.Services.FindAsync(context.Message.ServiceId);
 
-        if (service is not null)
+        try
         {
-            if (service.SpecializationId != context.Message.SpecializationId)
+            if (service is not null)
             {
-                await context.RespondAsync(
-                    new ServiceExistsAndBelongsToSpecializationResponse(false,
-                        "The service exists but belongs to a different specialization."));
+                if (service.SpecializationId != context.Message.SpecializationId)
+                {
+                    var message = "The service exists but belongs to a different specialization.";
+                    _logger.LogInformation(
+                        "{baseMessage} Expected Specialization: {ExpectedSpecialization}, Actual Specialization: {ActualSpecialization}",
+                        message, context.Message.SpecializationId, service.SpecializationId);
+                    await context.RespondAsync<ServiceExistsAndBelongsToSpecializationResponse>(
+                        new(false,
+                            message));
+                }
+
+                else
+                {
+                    _logger.LogInformation("The service belongs to the expected specialization");
+                    await context.RespondAsync<ServiceExistsAndBelongsToSpecializationResponse>(
+                        new(true, null));
+                }
             }
 
             else
             {
                 await context.RespondAsync(
-                    new ServiceExistsAndBelongsToSpecializationResponse(true, null));
+                    new ServiceExistsAndBelongsToSpecializationResponse(false,
+                        "The requested service does not exist."));
             }
         }
-
-        else
+        finally
         {
-            await context.RespondAsync(
-                new ServiceExistsAndBelongsToSpecializationResponse(false, "The requested service does not exist."));
+            _logger.LogInformation(
+                "Consistency check for Service with id: {ServiceId} and Specialization with id {SpecializationId} finished",
+                context.Message.ServiceId, context.Message.SpecializationId);
         }
     }
 }

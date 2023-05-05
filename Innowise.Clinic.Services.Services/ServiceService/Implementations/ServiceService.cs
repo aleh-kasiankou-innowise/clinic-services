@@ -28,7 +28,7 @@ public class ServiceService : IServiceService
         return await dbSetQuery.ToListAsync();
     }
 
-    public async Task<ServiceDto> GetServiceAsyncInfoAsync(Guid id)
+    public async Task<ServiceDto> GetServiceInfoAsync(Guid id)
     {
         var service = await GetServiceById(id);
         return new ServiceDto(service.Name, service.Price, service.Category, service.SpecializationId,

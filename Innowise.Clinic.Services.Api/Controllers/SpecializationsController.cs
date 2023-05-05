@@ -1,13 +1,12 @@
 using Innowise.Clinic.Services.Dto;
 using Innowise.Clinic.Services.Services.SpecializationService.Interfaces;
+using Innowise.Clinic.Shared.BaseClasses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Innowise.Clinic.Services.Api.Controllers;
 
-[ApiController]
-[Route("specializations")]
-public class SpecializationsController : ControllerBase
+public class SpecializationsController : ApiControllerBase
 {
     private readonly ISpecializationService _specializationService;
 
@@ -42,6 +41,5 @@ public class SpecializationsController : ControllerBase
     {
         await _specializationService.UpdateSpecializationAsync(id, updatedSpecialization);
         return Ok();
-        // Polymorphic deserialization (StatusUpdate, CompleteUpdate)
     }
 }

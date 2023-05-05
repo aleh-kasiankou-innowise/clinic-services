@@ -1,13 +1,14 @@
 using Innowise.Clinic.Services.Dto;
 using Innowise.Clinic.Services.Services.ServiceService.Interfaces;
+using Innowise.Clinic.Shared.BaseClasses;
+using Innowise.Clinic.Shared.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Innowise.Clinic.Services.Api.Controllers;
 
-[ApiController]
 [Route("services")]
-public class ServicesController : ControllerBase
+public class ServicesController : ApiControllerBase
 {
     private readonly IServiceService _serviceService;
 
@@ -19,18 +20,20 @@ public class ServicesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ServiceDto>>> GetServices()
     {
-        var isDisplayOnlyActiveServices = !User?.IsInRole("Receptionist") ?? true;
-
+        var isDisplayOnlyActiveServices = !User.IsInRole("Receptionist");
         return Ok(await _serviceService.GetServicesAsync(isDisplayOnlyActiveServices));
     }
 
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ServiceDto>> GetServiceInfo([FromRoute] Guid id)
     {
-        // figure out whether authorization is needed here
-        // if allowed anonymous, how to restrict users from watching unavailable services?
+        var serviceInfo = await _serviceService.GetServiceInfoAsync(id);
+        if (!serviceInfo.IsActive && !User.IsInRole("Receptionist"))
+        {
+            return Forbid();
+        }
 
-        return Ok(await _serviceService.GetServiceAsyncInfoAsync(id));
+        return Ok(serviceInfo);
     }
 
     [HttpPost]
@@ -45,7 +48,6 @@ public class ServicesController : ControllerBase
     [Authorize(Roles = "Receptionist")]
     public async Task<IActionResult> EditService([FromRoute] Guid id, [FromBody] ServiceEditStatusDto updatedServiceDto)
     {
-        // Polymorphic deserialization (StatusUpdate, CompleteUpdate)
         await _serviceService.UpdateServiceAsync(id, updatedServiceDto);
         return Ok();
     }

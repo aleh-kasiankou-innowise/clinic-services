@@ -20,7 +20,7 @@ public class HelperServicesController : ControllerBase
     public async Task<IActionResult> EnsureServiceExists([FromRoute] Guid id, [FromQuery] Guid? specializationId,
         [FromServices] IServiceService serviceService)
     {
-        var serviceDto = await serviceService.GetServiceAsyncInfoAsync(id);
+        var serviceDto = await serviceService.GetServiceInfoAsync(id);
         if (specializationId != null && specializationId != serviceDto.SpecializationId) return BadRequest();
         return Ok();
     }

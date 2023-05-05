@@ -14,6 +14,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
+using Serilog.Sinks.Elasticsearch;
 
 namespace Innowise.Clinic.Services.Configuration;
 
@@ -34,6 +36,7 @@ public static class ConfigurationExtensions
         services.AddMassTransit(x =>
         {
             x.AddConsumer<ServiceConsistencyCheckRequestConsumer>();
+            x.AddConsumer<ServiceNameRequestConsumer>();
             x.UsingRabbitMq((context, cfg) =>
             {
                 cfg.Host(rabbitMqConfig["HostName"], h =>
@@ -108,5 +111,26 @@ public static class ConfigurationExtensions
 
             await context.SaveChangesAsync();
         }
+    }
+    
+    public static WebApplicationBuilder ConfigureSerilog(this WebApplicationBuilder builder)
+    {
+        var logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .Enrich.FromLogContext()
+            .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(builder.Configuration["ElasticSearchHost"]))
+            {
+                AutoRegisterTemplate = true,
+                OverwriteTemplate = true,
+                IndexFormat = $"clinic.services-{0:yy.MM}",
+                BatchAction = ElasticOpType.Index,
+                DetectElasticsearchVersion = true,
+            })
+            .WriteTo.Console()
+            .CreateLogger();
+
+        Log.Logger = logger;
+        builder.Host.UseSerilog(logger);
+        return builder;
     }
 }
